@@ -8,6 +8,8 @@ build_requires 'Test::More';
 
 requires 'File::pushd';
 
+requires_external_bin 'git';
+
 auto_manifest;
 
 WriteAll;
