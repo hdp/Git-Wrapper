@@ -10,7 +10,7 @@ use File::Path qw(mkpath);
 
 my $dir = tempdir(CLEANUP => 1);
 
-my $git = Git::Wrapper->new({ dir => $dir });
+my $git = Git::Wrapper->new($dir);
 
 $git->init;
 

@@ -7,7 +7,7 @@ our $VERSION = '0.001';
 
 sub new {
   my ($class, $arg) = @_;
-  my $self = bless $arg => $class;
+  my $self = bless { dir => $arg } => $class;
   die "usage: $class->new({ dir => '/path/to/directory' })" unless $self->dir;
   return $self;
 }
@@ -74,7 +74,7 @@ Git::Wrapper - wrap git(7) command-line interface
 
 =head1 SYNOPSIS
 
-  my $git = Git::Wrapper->new({ dir => "/var/foo" });
+  my $git = Git::Wrapper->new('/var/foo');
 
   $git->commit(...)
   $git->log
@@ -98,6 +98,14 @@ Output is available as an array of lines, each chomped.
 
 This is intentionally minimal; I don't know yet what kind of post-processing
 will be useful.  Expect this to change in future releases.
+
+=head2 new
+
+  my $git = Git::Wrapper->new($dir);
+
+=head2 dir
+
+  print $git->dir; # /var/foo
 
 =head1 AUTHOR
 
