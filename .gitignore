@@ -9,3 +9,6 @@ pm_to_blib*
 .releaserc
 Git-Wrapper-*
 cover_db
+MANIFEST
+inc
+META.yml
