@@ -1,4 +1,14 @@
 Revision history for Git-Wrapper
 
-0.001   Date/time
+0.003   2008-06-05
+
+        improve error handling
+        make documentation clearer
+
+0.002   2008-06-04
+
+        properly depend on git binary
+
+0.001   2008-06-04
+
         First version, released on an unsuspecting world.
