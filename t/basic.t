@@ -36,4 +36,6 @@ my @rev_list =
 is(@rev_list, 1);
 like($rev_list[0], qr/^[a-f\d]{40} FIRST$/);
   
-
+eval { $git->no_such_command };
+ok(my $e = $@, "got an error");
+like($e, qr/'no-such-command' is not a git-command/);

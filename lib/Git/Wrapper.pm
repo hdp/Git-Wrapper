@@ -4,17 +4,18 @@ use warnings;
 package Git::Wrapper;
 
 our $VERSION = '0.002';
+use IPC::Open3 () ;
+use Symbol;
+use File::pushd;
 
 sub new {
-  my ($class, $arg) = @_;
-  my $self = bless { dir => $arg } => $class;
-  die "usage: $class->new({ dir => '/path/to/directory' })" unless $self->dir;
+  my ($class, $arg, %opt) = @_;
+  my $self = bless { dir => $arg, %opt } => $class;
+  die "usage: $class->new(\$dir)" unless $self->dir;
   return $self;
 }
 
 sub dir { shift->{dir} }
-
-use File::pushd;
 
 my $GIT = 'git';
 
@@ -51,15 +52,44 @@ sub AUTOLOAD {
   push @cmd, @_;
     
   #print "running [@cmd]\n";
-  my @out = do {
+  my @out;
+  my @err;
+  
+  {
     my $d = pushd $self->dir;
-    readpipe(join " ", map { "\Q$_\E" } @cmd);
+    my ($wtr, $rdr, $err);
+    $err = Symbol::gensym;
+    my $pid = IPC::Open3::open3($wtr, $rdr, $err, @cmd);
+    close $wtr;
+    chomp(@out = <$rdr>);
+    chomp(@err = <$err>);
+    waitpid $pid, 0;
   };
   #print "status: $?\n";
-  exit $? if $?;
+  if ($?) {
+    die Git::Wrapper::Exception->new(
+      output => \@out,
+      error  => \@err,
+      status => $? >> 8,
+    );
+  }
+    
   chomp(@out);
   return @out;
 }
+
+package Git::Wrapper::Exception;
+
+sub new { my $class = shift; bless { @_ } => $class }
+
+use overload (
+  q("") => 'error',
+  fallback => 1,
+);
+
+sub output { join "", map { "$_\n" } @{ shift->{output} } }
+sub error  { join "", map { "$_\n" } @{ shift->{error} } } 
+sub status { shift->{status} }
 
 1;
 __END__
@@ -77,7 +107,12 @@ Git::Wrapper - wrap git(7) command-line interface
   my $git = Git::Wrapper->new('/var/foo');
 
   $git->commit(...)
-  $git->log
+  print for $git->log;
+
+=head1 DESCRIPTION
+
+Git::Wrapper provides an API for git(7) that uses Perl data structures for
+argument passing, instead of CLI-style C<--options> as L<Git> does.
 
 =head1 METHODS
 
@@ -96,8 +131,26 @@ Output is available as an array of lines, each chomped.
 
   @sha1s_and_titles = $git->rev_list({ all => 1, pretty => 'oneline' });
 
-This is intentionally minimal; I don't know yet what kind of post-processing
-will be useful.  Expect this to change in future releases.
+If a git command exits nonzero, a C<Git::Wrapper::Exception> object will be
+thrown.  It has three useful methods:
+
+=over
+
+=item * error
+
+error message
+
+=item * output
+
+normal output, as a single string
+
+=item * status
+
+the exit status
+
+=back
+
+The exception stringifies to the error message.
 
 =head2 new
 
