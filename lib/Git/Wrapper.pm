@@ -160,6 +160,13 @@ The exception stringifies to the error message.
 
   print $git->dir; # /var/foo
 
+=head1 SEE ALSO
+
+L<VCI::VCS::Git> is the git implementation for L<VCI>, a generic interface to
+version-controle systems.
+
+Git itself is at L<http://git.or.cz>.
+
 =head1 AUTHOR
 
 Hans Dieter Pearcey, C<< <hdp@cpan.org> >>
