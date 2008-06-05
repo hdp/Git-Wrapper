@@ -3,7 +3,7 @@ use warnings;
 
 package Git::Wrapper;
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 sub new {
   my ($class, $arg) = @_;
@@ -70,7 +70,7 @@ Git::Wrapper - wrap git(7) command-line interface
 
 =head1 VERSION
 
-  Version 0.001
+  Version 0.002
 
 =head1 SYNOPSIS
 
