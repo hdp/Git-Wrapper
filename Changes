@@ -4,6 +4,8 @@ Revision history for Git-Wrapper
 
         add links to other git-related things
 
+        inflate Git::Wrapper::Log objects
+
 0.003   2008-06-05
 
         improve error handling
