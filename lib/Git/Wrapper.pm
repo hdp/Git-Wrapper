@@ -21,17 +21,17 @@ my $GIT = 'git';
 
 sub _opt {
   my $name = shift;
+  $name =~ tr/_/-/;
   return length($name) == 1 
     ? "-$name"
     : "--$name"
   ;
 }
 
-sub AUTOLOAD {
+sub _cmd {
   my $self = shift;
-  (my $meth = our $AUTOLOAD) =~ s/.+:://;
-  return if $meth eq 'DESTROY';
-  $meth =~ tr/_/-/;
+
+  my $cmd = shift;
 
   my $opt = ref $_[0] eq 'HASH' ? shift : {};
 
@@ -43,7 +43,7 @@ sub AUTOLOAD {
     next if $val eq '0';
     push @cmd, _opt($name) . ($val eq '1' ? "" : "=$val");
   }
-  push @cmd, $meth;
+  push @cmd, $cmd;
   for my $name (keys %$opt) {
     my $val = delete $opt->{$name};
     next if $val eq '0';
@@ -78,6 +78,45 @@ sub AUTOLOAD {
   return @out;
 }
 
+sub AUTOLOAD {
+  my $self = shift;
+  (my $meth = our $AUTOLOAD) =~ s/.+:://;
+  return if $meth eq 'DESTROY';
+  $meth =~ tr/_/-/;
+
+  return $self->_cmd($meth, @_);
+}
+
+sub log {
+  my $self = shift;
+  my $opt  = ref $_[0] eq 'HASH' ? shift : {};
+  $opt->{no_color} = 1;
+  my @out = $self->_cmd(log => $opt, @_);
+
+  my @logs;
+  while (@out) {
+    local $_ = shift @out;
+    die "unhandled: $_" unless /^commit (\S+)/;
+    my $current = Git::Wrapper::Log->new($1);
+    $_ = shift @out;
+
+    while (/^(\S+):\s+(.+)$/) {
+      $current->attr->{lc $1} = $2;
+      $_ = shift @out;
+    }
+    die "no blank line separating head from body" if $_;
+    my $body = '';
+    while (@out and length($_ = shift @out)) {
+      s/^\s+//;
+      $body .= "$_\n";
+    }
+    $current->body($body);
+    push @logs, $current;
+  }
+
+  return @logs;
+}
+
 package Git::Wrapper::Exception;
 
 sub new { my $class = shift; bless { @_ } => $class }
@@ -90,6 +129,27 @@ use overload (
 sub output { join "", map { "$_\n" } @{ shift->{output} } }
 sub error  { join "", map { "$_\n" } @{ shift->{error} } } 
 sub status { shift->{status} }
+
+package Git::Wrapper::Log;
+
+sub new { 
+  my ($class, $id, %arg) = @_;
+  return bless {
+    id => $id,
+    attr => {},
+    %arg,
+  } => $class;
+}
+
+sub id { shift->{id} }
+
+sub attr { shift->{attr} }
+
+sub body { @_ > 1 ? ($_[0]->{body} = $_[1]) : $_[0]->{body} }
+
+sub date { shift->attr->{date} }
+
+sub author { shift->attr->{author} }
 
 1;
 __END__
