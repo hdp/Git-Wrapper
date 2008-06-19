@@ -47,5 +47,5 @@ my @log = $git->log;
 is(@log, 1, 'one log entry');
 my $log = $log[0];
 is($log->id, (split /\s/, $rev_list[0])[0], 'id');
-is($log->body, "FIRST\n", "body");
+is($log->message, "FIRST\n", "message");
 is($log->date, $date, "date");

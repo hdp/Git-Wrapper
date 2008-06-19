@@ -104,13 +104,13 @@ sub log {
       $current->attr->{lc $1} = $2;
       $_ = shift @out;
     }
-    die "no blank line separating head from body" if $_;
-    my $body = '';
+    die "no blank line separating head from message" if $_;
+    my $message = '';
     while (@out and length($_ = shift @out)) {
       s/^\s+//;
-      $body .= "$_\n";
+      $message .= "$_\n";
     }
-    $current->body($body);
+    $current->message($message);
     push @logs, $current;
   }
 
@@ -145,7 +145,7 @@ sub id { shift->{id} }
 
 sub attr { shift->{attr} }
 
-sub body { @_ > 1 ? ($_[0]->{body} = $_[1]) : $_[0]->{body} }
+sub message { @_ > 1 ? ($_[0]->{message} = $_[1]) : $_[0]->{message} }
 
 sub date { shift->attr->{date} }
 
@@ -167,7 +167,7 @@ Git::Wrapper - wrap git(7) command-line interface
   my $git = Git::Wrapper->new('/var/foo');
 
   $git->commit(...)
-  print for $git->log;
+  print $_->message for $git->log;
 
 =head1 DESCRIPTION
 
@@ -219,6 +219,25 @@ The exception stringifies to the error message.
 =head2 dir
 
   print $git->dir; # /var/foo
+
+=head2 log
+
+  my @logs = $git->log;
+
+Instead of giving back an arrayref of lines, the C<log> method returns a list
+of C<Git::Wrapper::Log> objects.  They have four methods:
+
+=over
+
+=item * id
+
+=item * author
+
+=item * date
+
+=item * message
+
+=back
 
 =head1 SEE ALSO
 
