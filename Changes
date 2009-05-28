@@ -1,5 +1,9 @@
 Revision history for Git-Wrapper
 
+0.005   2009-05-28
+
+        change tests to pass on git 1.6
+
 0.004   2008-06-19
 
         add links to other git-related things

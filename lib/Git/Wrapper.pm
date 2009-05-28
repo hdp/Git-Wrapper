@@ -3,7 +3,7 @@ use warnings;
 
 package Git::Wrapper;
 
-our $VERSION = '0.004';
+our $VERSION = '0.005';
 use IPC::Open3 () ;
 use Symbol;
 use File::pushd;
@@ -87,6 +87,13 @@ sub AUTOLOAD {
   return $self->_cmd($meth, @_);
 }
 
+sub version {
+  my $self = shift;
+  my ($version) = $self->_cmd('version');
+  $version =~ s/^git version //;
+  return $version;
+}
+
 sub log {
   my $self = shift;
   my $opt  = ref $_[0] eq 'HASH' ? shift : {};
@@ -160,7 +167,7 @@ Git::Wrapper - wrap git(7) command-line interface
 
 =head1 VERSION
 
-  Version 0.004
+  Version 0.005
 
 =head1 SYNOPSIS
 
@@ -219,6 +226,10 @@ The exception stringifies to the error message.
 =head2 dir
 
   print $git->dir; # /var/foo
+
+=head2 version
+
+  my $version = $git->version; # 1.6.1.4.8.15.16.23.42
 
 =head2 log
 

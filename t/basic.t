@@ -31,17 +31,22 @@ is_deeply(
   [ 'foo/bar' ],
 );
 
+my $time = time;
 $git->commit({ message => "FIRST" });
-my $date = strftime("%a %b %d %H:%M:%S %Y %z", localtime);
+my $date = strftime("%a %b %d %H:%M:%S %Y %z", localtime($time));
 
 my @rev_list =  
-  $git->rev_list({ all => 1, quiet => 1, pretty => 'oneline' });
+  $git->rev_list({ all => 1, pretty => 'oneline' });
 is(@rev_list, 1);
 like($rev_list[0], qr/^[a-f\d]{40} FIRST$/);
   
-eval { $git->no_such_command };
+eval { $git->a_command_not_likely_to_exist };
 ok(my $e = $@, "got an error");
-like($e, qr/'no-such-command' is not a git-command/);
+if ($git->version ge '1.6') {
+  like($e, qr/which does not exist/);
+} else {
+  like($e, qr/'no-such-command' is not a git-command/);
+}
 
 my @log = $git->log;
 is(@log, 1, 'one log entry');
