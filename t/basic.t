@@ -33,7 +33,6 @@ is_deeply(
 
 my $time = time;
 $git->commit({ message => "FIRST" });
-my $date = strftime("%a %b %d %H:%M:%S %Y %z", localtime($time));
 
 my @rev_list =  
   $git->rev_list({ all => 1, pretty => 'oneline' });
@@ -45,10 +44,11 @@ ok(my $e = $@, "got an error");
 if ($git->version ge '1.6') {
   like($e, qr/which does not exist/);
 } else {
-  like($e, qr/'no-such-command' is not a git-command/);
+  like($e, qr/is not a git-command/);
 }
 
-my @log = $git->log;
+my $date = strftime("%Y-%m-%d %H:%M:%S %z", localtime($time));
+my @log = $git->log({ date => 'iso' });
 is(@log, 1, 'one log entry');
 my $log = $log[0];
 is($log->id, (split /\s/, $rev_list[0])[0], 'id');

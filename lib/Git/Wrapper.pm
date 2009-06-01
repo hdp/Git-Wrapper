@@ -3,7 +3,7 @@ use warnings;
 
 package Git::Wrapper;
 
-our $VERSION = '0.005';
+our $VERSION = '0.006';
 use IPC::Open3 () ;
 use Symbol;
 use File::pushd;
@@ -167,7 +167,7 @@ Git::Wrapper - wrap git(7) command-line interface
 
 =head1 VERSION
 
-  Version 0.005
+  Version 0.006
 
 =head1 SYNOPSIS
 
